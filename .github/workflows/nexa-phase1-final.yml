@@ -18,7 +18,7 @@ jobs:
         run: |
           rm -rf nexa
           mkdir nexa
-          unzip -o "NexaERP-SourceCode-v3.0-2026-08-05(1).zip" -d nexa
+          unzip -o "NexaERP-SourceCode-v3.0-2026-08-05.zip" -d nexa
 
       # 🔥 DELETE UNUSED FILES (EXACT TARGET)
       - name: 🧹 Remove Unused Files
