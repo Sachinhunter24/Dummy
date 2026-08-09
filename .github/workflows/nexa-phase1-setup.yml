@@ -1,0 +1,58 @@
+name: Nexa ERP Phase1 Setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: 📦 Unzip Nexa ERP
+        run: |
+          mkdir -p nexa
+          unzip -o "NexaERP-SourceCode-v3.0-2026-08-05.zip" -d nexa
+
+      # 🔥 REMOVE UNNECESSARY FILES (Phase 2/3 cleanup)
+      - name: 🧹 Remove Unused Modules
+        run: |
+          rm -rf nexa/**/crm || true
+          rm -rf nexa/**/automation || true
+          rm -rf nexa/**/advanced || true
+          rm -rf nexa/**/analytics || true
+
+      # 🔥 KEEP ONLY CORE (billing + inventory)
+      - name: 📂 Ensure Core Modules
+        run: |
+          echo "Keeping billing & inventory related files"
+
+      # 💡 BASIC CODE PATCH (branding + phase flag)
+      - name: ✏️ Inject Phase1 Config
+        run: |
+          echo "export const PHASE = 'phase1';" > nexa/phaseConfig.js
+
+      # 💡 OPTIONAL TEXT REPLACE (safe replace)
+      - name: 🏷️ Replace Branding
+        run: |
+          grep -rl "Nexa" nexa | xargs sed -i 's/Nexa/Universal/g' || true
+
+      # 📁 MOVE TO FINAL FOLDER
+      - name: 📂 Move Clean Project
+        run: |
+          rm -rf working-project
+          mv nexa working-project
+
+      # 💾 Commit Changes
+      - name: 💾 Commit Final Phase1 Setup
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Phase1 Nexa ERP ready (cleaned + basic config)"
+          git push
