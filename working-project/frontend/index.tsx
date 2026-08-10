@@ -5,14 +5,11 @@ import './theme.css';
 
 const rootElement = document.getElementById('root');
 
-if (!rootElement) {
-  throw new Error('Failed to find the root element');
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
 }
-
-const root = ReactDOM.createRoot(rootElement);
-
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
