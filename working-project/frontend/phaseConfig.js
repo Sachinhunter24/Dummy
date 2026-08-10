@@ -1,1 +1,1 @@
-export const PHASE = 'phase1';
+export const PHASE = 'full';
