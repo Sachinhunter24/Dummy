@@ -1,4 +1,4 @@
-name: Unzip Dummy Project
+name: Unzip Dummy Main
 
 on:
   workflow_dispatch:
@@ -7,96 +7,21 @@ permissions:
   contents: write
 
 jobs:
-  unzip-project:
+  unzip:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Find Dummy ZIP
-        shell: bash
+      - name: Unzip Dummy-main.zip
         run: |
-          set -e
+          unzip -o "Dummy-main.zip" -d .
 
-          ZIP=$(find . -maxdepth 2 -type f -name "Dummy-main.zip" | head -n 1)
-
-          if [ -z "$ZIP" ]; then
-            echo "ERROR: Dummy-main.zip not found."
-            exit 1
-          fi
-
-          echo "Found: $ZIP"
-
-          rm -rf extracted
-          mkdir extracted
-
-          unzip -o "$ZIP" -d extracted
-
-      - name: Prepare frontend
-        shell: bash
+      - name: Commit extracted files
         run: |
-          set -e
-
-          if [ ! -d "extracted/Dummy-main/frontend" ]; then
-            echo "ERROR: extracted/Dummy-main/frontend not found."
-            find extracted -maxdepth 4 -type f | sort
-            exit 1
-          fi
-
-          rm -rf final-project
-          mkdir final-project
-
-          # Sirf actual frontend project ko root ke frontend folder mein rakho
-          cp -a extracted/Dummy-main/frontend/. final-project/
-
-      - name: Remove old nested project
-        shell: bash
-        run: |
-          set -e
-
-          rm -rf working-projects
-          rm -rf Dummy-main
-          rm -rf extracted
-
-          # Purana frontend hatao, agar pehle se nested structure mein tha
-          rm -rf frontend
-
-          # Actual project root par lao
-          cp -a final-project frontend
-
-          rm -rf final-project
-
-      - name: Verify project
-        shell: bash
-        run: |
-          echo "===== FINAL STRUCTURE ====="
-          find frontend -maxdepth 3 -type f | sort
-
-          echo "===== PACKAGE.JSON ====="
-
-          if [ ! -f "frontend/package.json" ]; then
-            echo "ERROR: frontend/package.json missing."
-            exit 1
-          fi
-
-          cat frontend/package.json
-
-      - name: Commit changes
-        shell: bash
-        run: |
-          set -e
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add -A
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Extract Dummy project and clean structure"
-            git push
-          fi
+          git commit -m "Unzip Dummy-main.zip" || echo "No changes"
+          git push
