@@ -1,0 +1,123 @@
+name: Prepare and Deploy Universal ERP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find and extract ERP ZIP
+        shell: bash
+        run: |
+          set -e
+
+          ZIP=$(find . -maxdepth 2 -type f \
+            \( -iname "*.zip" \) \
+            | grep -Ei 'nexa|erp|universal' \
+            | head -n 1 || true)
+
+          if [ -z "$ZIP" ]; then
+            echo "ERROR: ERP ZIP not found."
+            find . -maxdepth 3 -type f | sort
+            exit 1
+          fi
+
+          echo "Using ZIP: $ZIP"
+
+          rm -rf _extracted
+          mkdir -p _extracted
+
+          unzip -o "$ZIP" -d _extracted
+
+      - name: Locate actual project
+        shell: bash
+        run: |
+          set -e
+
+          PROJECT=$(find _extracted -type f -name "package.json" \
+            -not -path "*/node_modules/*" \
+            | head -n 1 || true)
+
+          if [ -z "$PROJECT" ]; then
+            echo "ERROR: package.json not found."
+            find _extracted -maxdepth 5 -type f | sort
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$PROJECT")
+
+          echo "Project found at: $PROJECT_DIR"
+
+          rm -rf _project
+          mkdir -p _project
+
+          cp -a "$PROJECT_DIR"/. _project/
+
+      - name: Clean repository structure
+        shell: bash
+        run: |
+          set -e
+
+          # Keep the original ZIP safe.
+          find . -maxdepth 1 -type d \
+            ! -name "." \
+            ! -name ".git" \
+            ! -name ".github" \
+            ! -name "_extracted" \
+            ! -name "_project" \
+            -exec rm -rf {} +
+
+          # Remove old nested project structures.
+          rm -rf working-projects
+          rm -rf workflow
+          rm -rf _extracted
+
+          # Remove old project files from root while preserving GitHub config.
+          find . -maxdepth 1 -type f \
+            ! -name "*.zip" \
+            ! -name ".gitignore" \
+            -delete
+
+          cp -a _project/. .
+
+          rm -rf _project
+
+      - name: Install dependencies and build
+        shell: bash
+        run: |
+          set -e
+
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+          npm run build
+
+      - name: Commit clean project
+        shell: bash
+        run: |
+          set -e
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Prepare Universal ERP project"
+            git push
+          fi
