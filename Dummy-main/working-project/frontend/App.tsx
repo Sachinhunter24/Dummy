@@ -1,21 +1,22 @@
 import React from 'react';
-import { AppProvider, useApp } from './context/AppContext';
-import { DataProvider } from './context/DataContext';
-import LoginRegister from './pages/LoginRegister';
-import Dashboard from './pages/Dashboard';
-
-function Application() {
-  const { isLoggedIn } = useApp();
-
-  return isLoggedIn ? <Dashboard /> : <LoginRegister />;
-}
 
 export default function App() {
   return (
-    <AppProvider>
-      <DataProvider>
-        <Application />
-      </DataProvider>
-    </AppProvider>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <h1>Universal ERP</h1>
+        <p>React is loading successfully.</p>
+        <p>Phase 1 diagnostic test</p>
+      </div>
+    </div>
   );
 }
