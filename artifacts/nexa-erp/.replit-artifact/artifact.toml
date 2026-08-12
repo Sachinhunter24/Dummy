@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Nexa ERP"
+description = "A small-business ERP workspace for point-of-sale billing, inventory, expenses, customer credit, and business overviews."
+version = "1.0.0"
+id = "artifacts/nexa-erp"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22335
+
+[services.development]
+run = "pnpm --filter @workspace/nexa-erp run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nexa-erp", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nexa-erp/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22335"
+BASE_PATH = "/"
