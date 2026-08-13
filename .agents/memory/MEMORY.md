@@ -1,0 +1,1 @@
+- [Local file exchange](local-file-exchange.md) — keep ERP spreadsheet workflows browser-side and Excel/Sheets-compatible without backend dependencies.
