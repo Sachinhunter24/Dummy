@@ -2,31 +2,16 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { mockupPreviewPlugin } from "./mockupPreviewPlugin";
 
-// Fallbacks taaki Vercel build crash na ho
-const rawPort = process.env.PORT || "3000";
-const port = Number(rawPort) > 0 ? Number(rawPort) : 3000;
+// Safely handle PORT & BASE_PATH without throwing errors on Vercel
+const port = Number(process.env.PORT) || 3000;
 const basePath = process.env.BASE_PATH || "/";
 
 export default defineConfig({
   base: basePath,
   plugins: [
-    mockupPreviewPlugin(),
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-        ]
-      : []),
   ],
   resolve: {
     alias: {
@@ -42,9 +27,6 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
-    fs: {
-      strict: true,
-    },
   },
   preview: {
     port,
