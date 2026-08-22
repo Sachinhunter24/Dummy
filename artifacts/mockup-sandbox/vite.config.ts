@@ -1,36 +1,16 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-
-// Safely handle PORT & BASE_PATH without throwing errors on Vercel
-const port = Number(process.env.PORT) || 3000;
-const basePath = process.env.BASE_PATH || "/";
+import { defineConfig } from 'vite';
+import react from '@vitejs.plugin-react';
+import path from 'path';
 
 export default defineConfig({
-  base: basePath,
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist"),
+    outDir: 'dist',
     emptyOutDir: true,
-  },
-  server: {
-    port,
-    host: "0.0.0.0",
-    allowedHosts: true,
-  },
-  preview: {
-    port,
-    host: "0.0.0.0",
-    allowedHosts: true,
   },
 });
