@@ -25,6 +25,17 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  /* --- SIDEBAR TAILWIND V4 MAPPING --- */
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
   --font-sans: var(--app-font-sans);
   --font-mono: var(--app-font-mono);
   --radius-sm: calc(var(--radius) - 4px);
@@ -57,13 +68,16 @@
   --app-font-sans: 'DM Sans', sans-serif;
   --app-font-mono: 'Space Grotesk', monospace;
   --radius: 0.8rem;
-  --sidebar: 168 51% 17%;
-  --sidebar-foreground: 45 33% 94%;
-  --sidebar-border: 168 33% 27%;
-  --sidebar-primary: 42 88% 65%;
-  --sidebar-primary-foreground: 168 51% 17%;
-  --sidebar-accent: 168 39% 24%;
-  --sidebar-accent-foreground: 45 33% 94%;
+
+  /* --- HIGH CONTRAST SIDEBAR COLORS (LIGHT MODE) --- */
+  --sidebar: 222 47% 11%;                  /* Deep Slate Black */
+  --sidebar-foreground: 0 0% 98%;           /* Pure Bright White Text */
+  --sidebar-border: 217 33% 18%;            /* Dark Subtle Border */
+  --sidebar-primary: 168 67% 38%;          /* Active Teal/Emerald Accent */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 217 33% 20%;           /* Hover State Background */
+  --sidebar-accent-foreground: 0 0% 100%;  /* Hover State Text */
+  --sidebar-ring: 168 67% 29%;
 }
 
 .dark {
@@ -87,13 +101,16 @@
   --accent-foreground: 22 40% 98%;
   --destructive: 3 68% 58%;
   --destructive-foreground: 40 25% 93%;
-  --sidebar: 172 25% 8%;
-  --sidebar-foreground: 40 25% 93%;
-  --sidebar-border: 172 16% 19%;
+
+  /* --- HIGH CONTRAST SIDEBAR COLORS (DARK MODE) --- */
+  --sidebar: 224 71% 4%;                   /* Ultra Dark Navy */
+  --sidebar-foreground: 0 0% 100%;          /* Crisp White Text */
+  --sidebar-border: 217 33% 15%;
   --sidebar-primary: 42 88% 65%;
   --sidebar-primary-foreground: 168 51% 17%;
-  --sidebar-accent: 172 20% 16%;
-  --sidebar-accent-foreground: 40 25% 93%;
+  --sidebar-accent: 217 33% 16%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 42 88% 65%;
 }
 
 @layer base {
@@ -179,3 +196,4 @@ input::placeholder, textarea::placeholder { color: hsl(var(--muted-foreground) /
 .data-table td { border-top: 1px solid hsl(var(--border)); padding: .82rem .75rem; vertical-align: middle; }
 .data-table tbody tr { transition: background-color .16s ease; }
 .data-table tbody tr:hover { background: hsl(var(--muted) / .42); }
+                
