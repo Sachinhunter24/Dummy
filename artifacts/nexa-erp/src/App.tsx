@@ -3,17 +3,17 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   ArrowDownRight, ArrowUpRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays,
   CreditCard, Download, IndianRupee, LayoutDashboard, LogOut, Package,
-  ShoppingCart, TrendingUp, Users, Wallet, X,
+  ShoppingCart, TrendingUp, Users, Wallet,
 } from 'lucide-react';
 import { Route, Switch, useLocation } from 'wouter';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/error-boundary';
 import {
-  mockCustomers, mockExpenses, mockNotifications, mockProducts, mockStaff, mockUdhaarAccounts,
+  mockCustomers, mockExpenses, mockProducts,
 } from '@/legacy/data/mockData';
 import type {
-  AppNotification, Customer, Expense, Product, StaffMember, UdhaarAccount,
+  Customer, Expense, Product,
 } from '@/legacy/types/erp';
 
 // SUPABASE & AUTH IMPORTS
@@ -23,14 +23,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 const queryClient = new QueryClient();
 const money = (value: number) => `₹${Math.abs(value).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const dateToday = () => new Date().toISOString().slice(0, 10);
-const timeNow = () => new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 const daysAgo = (days: number) => {
   const value = new Date();
   value.setDate(value.getDate() - days);
   return value.toISOString().slice(0, 10);
 };
-const uid = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-const initials = (name: string) => name.split(' ').map((word) => word[0]).slice(0, 2).join('').toUpperCase();
 
 const readStore = <T,>(key: string, fallback: T): T => {
   try {
@@ -43,7 +40,6 @@ const readStore = <T,>(key: string, fallback: T): T => {
 const writeStore = (key: string, value: unknown) => localStorage.setItem(key, JSON.stringify(value));
 
 type ModuleId = 'overview' | 'pos' | 'inventory' | 'udhaar' | 'expenses' | 'clients' | 'staff' | 'reports';
-type ModalKind = 'product' | 'expense' | 'client' | 'staff' | null;
 type SalePayment = 'Cash' | 'UPI' | 'Card' | 'Udhaar';
 type ExportFormat = 'excel' | 'txt' | 'zip';
 
@@ -140,7 +136,7 @@ function downloadDataset(filename: string, headers: string[], rows: (string | nu
   downloadBlob(`${filename}.${format === 'excel' ? 'csv' : 'txt'}`, new Blob([csv], { type: format === 'excel' ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8' }));
 }
 
-// AUTH SCREENS (LOGIN & REGISTER)
+// SECURE LOGIN & REGISTER COMPONENT
 function AuthScreen() {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
@@ -161,7 +157,7 @@ function AuthScreen() {
         options: { data: { full_name: fullName } },
       });
       if (error) setError(error.message);
-      else alert('Registration successful! Confirm your email or login directly.');
+      else alert('Account created successfully!');
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
@@ -174,10 +170,10 @@ function AuthScreen() {
       <div className="card-surface w-full max-w-md space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight">
-            {isRegister ? 'Register Nexa ERP' : 'Welcome Back'}
+            {isRegister ? 'Create Nexa ERP Account' : 'Welcome Back'}
           </h1>
           <p className="text-xs text-muted-foreground">
-            {isRegister ? 'Naya account banakar start karo' : 'Apna account login karo'}
+            {isRegister ? 'Details daal kar account banao' : 'Login karke aage badho'}
           </p>
         </div>
 
@@ -190,6 +186,7 @@ function AuthScreen() {
               <input
                 type="text"
                 placeholder="Don"
+                className="w-full rounded-md border p-2 text-sm"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -201,6 +198,7 @@ function AuthScreen() {
             <input
               type="email"
               placeholder="name@example.com"
+              className="w-full rounded-md border p-2 text-sm"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -211,6 +209,7 @@ function AuthScreen() {
             <input
               type="password"
               placeholder="••••••••"
+              className="w-full rounded-md border p-2 text-sm"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -222,7 +221,7 @@ function AuthScreen() {
         </form>
 
         <div className="text-center text-xs text-muted-foreground">
-          {isRegister ? 'Pehle se account hai? ' : 'Account nahi hai? '}
+          {isRegister ? 'Pehle se account hai? ' : 'Naya account chahiye? '}
           <button onClick={() => setIsRegister(!isRegister)} className="font-semibold text-primary hover:underline">
             {isRegister ? 'Sign In' : 'Register Here'}
           </button>
@@ -232,7 +231,7 @@ function AuthScreen() {
   );
 }
 
-// MAIN WORKSPACE
+// MAIN ERP WORKSPACE
 function Workspace() {
   const { user, signOut } = useAuth();
   const [dark, setDark] = useState(() => readStore('nexa_dark', false));
@@ -249,7 +248,7 @@ function Workspace() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* Sidebar */}
+      {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-sidebar-border bg-sidebar p-4 text-sidebar-foreground">
         <div className="mb-8 flex items-center gap-2">
           <Logo />
@@ -276,12 +275,12 @@ function Workspace() {
         </nav>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Workspace Area */}
       <main className="flex-1 p-8">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Welcome back, {user.user_metadata?.full_name || user.email}</h2>
-            <p className="text-xs text-muted-foreground">App Dashboard and POS</p>
+            <h2 className="text-xl font-bold">Welcome, {user.user_metadata?.full_name || user.email}</h2>
+            <p className="text-xs text-muted-foreground">Connected directly to Supabase Backend</p>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setDark(!dark)} className="icon-button">
@@ -313,27 +312,27 @@ function Reports({ expenses, products, sales }: { expenses: Expense[]; products:
   const reportRows = products.map((item) => [item.name, item.sku, item.quantity, item.price, item.cost * item.quantity]);
 
   return (
-    <PageHeader eyebrow="Make better calls" title="Reports" description="Sales, Profit aur Inventory ki exact summary." actions={<ExportActions filename="nexa-report" headers={['Product', 'SKU', 'Stock', 'Price', 'Value']} rows={reportRows} />}>
+    <PageHeader eyebrow="Live Reports" title="Business Overview" description="Sales, Profit aur Inventory ki real-time breakdown." actions={<ExportActions filename="nexa-report" headers={['Product', 'SKU', 'Stock', 'Price', 'Value']} rows={reportRows} />}>
       <section className="card-surface mb-5">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1">
-            <p className="mb-2 text-xs font-semibold">Report period</p>
+            <p className="mb-2 text-xs font-semibold">Report Period</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="From"><input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} /></Field>
               <Field label="To"><input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} /></Field>
             </div>
           </div>
           <div className="rounded-lg bg-muted/45 p-3 text-xs text-muted-foreground">
-            <CalendarDays size={15} className="mb-1 text-primary" />{filteredSales.length} bills generated
+            <CalendarDays size={15} className="mb-1 text-primary" />{filteredSales.length} bills processed
           </div>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Gross sales" value={money(grossSales)} note={`${filteredSales.length} bills in selected period`} trend="up" icon={TrendingUp} />
-        <MetricCard label="Gross profit" value={money(grossProfit)} note="Sales minus product cost" trend="up" icon={BarChart3} tone="gold" />
-        <MetricCard label="Net profit" value={money(grossProfit - expenseTotal)} note={`${money(expenseTotal)} expenses deducted`} trend={grossProfit - expenseTotal >= 0 ? 'up' : 'down'} icon={IndianRupee} tone="ink" />
-        <MetricCard label="Stock value" value={money(products.reduce((sum, item) => sum + item.cost * item.quantity, 0))} note="Total stock at cost" trend="neutral" icon={Boxes} tone="coral" />
+        <MetricCard label="Gross Sales" value={money(grossSales)} note={`${filteredSales.length} total bills`} trend="up" icon={TrendingUp} />
+        <MetricCard label="Gross Profit" value={money(grossProfit)} note="Total profit before expenses" trend="up" icon={BarChart3} tone="gold" />
+        <MetricCard label="Net Profit" value={money(grossProfit - expenseTotal)} note={`${money(expenseTotal)} operational expenses`} trend={grossProfit - expenseTotal >= 0 ? 'up' : 'down'} icon={IndianRupee} tone="ink" />
+        <MetricCard label="Stock Value" value={money(products.reduce((sum, item) => sum + item.cost * item.quantity, 0))} note="Current inventory value" trend="neutral" icon={Boxes} tone="coral" />
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -416,4 +415,4 @@ function App() {
 }
 
 export default App;
-  
+                                                       
